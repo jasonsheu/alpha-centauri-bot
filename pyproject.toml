@@ -1,0 +1,14 @@
+[build-system]
+build-backend = "poetry.masonry.api"
+requires = ["poetry>=0.12"]
+
+[tool]
+[tool.poetry]
+authors = ["repl.it user <replituser@example.com>"]
+description = ""
+name = "alpha-centauri-bot"
+version = "0.1.0"
+[tool.poetry.dependencies]
+flask = "^1.1"
+python = "^3.7"
+[tool.poetry.dev-dependencies]
