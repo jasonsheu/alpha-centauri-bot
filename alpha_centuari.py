@@ -60,21 +60,64 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    random_length = random.randint(10, 50)
-    if message.content.startswith('ac!generate'):
-        if message.author != client.user:
-            await message.channel.send(generate_random_sentence(model, random_length))
+    channel_id = '%%' + str(message.channel.id)
     
+    random_length = random.randint(5, 30)
+    if message.content.startswith('ac!generate %%'):
+        if message.author != client.user:
+            generate = generate_random_sentence(model, random_length)
+            combine = re.findall(r'%%[0-9]+', message.content)[0] + ' ' + generate
+            await message.channel.send(combine)
+
+    if message.content.startswith('ac!generate'):
+        if '%%' not in message.content: 
+            if message.author != client.user:
+                generate = generate_random_sentence(model, random_length)
+                combine = generate
+                await message.channel.send(combine)
+    
+    #bot talking
+    if message.content.startswith('ac!complete %%'):
+       
+        removed_id = re.sub(r'%%[0-9]+', '',message.content)
+        
+        to_complete = removed_id[13:]
+        stripped = to_complete.strip('"')
+        
+        sav_id = re.findall(r'%%[0-9]+', message.content)[0]
+        if len(stripped) == 0:
+            if message.author != client.user:
+                    error = '!!error give me something to complete .-.'
+                    combine = sav_id + ' ' + error
+                    await message.channel.send(combine)
+        elif message.author != client.user:
+            generate = finish_sentence(model, random_length, stripped)
+            combine = sav_id + ' ' + generate
+            await message.channel.send(combine)
+
     if message.content.startswith('ac!complete "'):
         to_complete = message.content[13:]
         stripped = to_complete.strip('"')
-        if message.author != client.user:
-            await message.channel.send(finish_sentence(model, random_length, stripped))
-    if message.content.startswith('ac!complete') and message.content[12] != '"':
-        
-        if message.author != client.user:
-            await message.channel.send('add quotation marks around your text silly')
-
+        if '%%' not in message.content: 
+            if message.author != client.user:
+                generate = finish_sentence(model, random_length, stripped)
+                combine = generate
+                await message.channel.send(combine)
+            
+    if message.content.startswith('ac!complete'):
+        if '%%' not in message.content: 
+            if len(message.content) < 12:
+                if message.author != client.user:
+                    error = '!!error give me something to complete .-.'
+                    combine = error
+                    await message.channel.send(combine)
+            elif message.content[12] != '"':
+                if message.author != client.user:
+                    error = '!!error add quotation marks around your text silly'
+                    combine = error
+                    await message.channel.send(combine)
+            
+            
 keep_alive
 token = os.environ.get("DISCORD_BOT_SECRET")
 client.run(token)
